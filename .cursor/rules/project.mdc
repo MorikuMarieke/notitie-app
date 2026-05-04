@@ -1,0 +1,20 @@
+---
+description: Algemene projectregels en conventies
+alwaysApply: true
+---
+# Project Regels
+## Tech Stack
+- Next.js 16 met App Router
+- TypeScript (strict mode)
+- Tailwind CSS voor styling
+## Conventies
+- Gebruik functionele componenten met TS interfaces
+- Bestandsnamen in kebab-case
+- Componenten in PascalCase
+- Gebruik async/await i.p.v. .then() chains
+## Mappenstructuur
+- src/app/ -- App Router pagina's en layouts
+NOVI Hogeschool Utrecht — AI-Assisted Development Les 9 Huiswerk — Pagina 4
+- src/components/ -- Herbruikbare componenten
+- src/lib/ -- Utility functies en types
+- src/types/ -- TypeScript type definities

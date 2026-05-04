@@ -1,0 +1,10 @@
+---
+description: Regels voor React componenten
+globs: "src/components/**/*.tsx"
+---
+
+# Component Rules
+- Props interface boven component
+- Gebruik "use client" alleen wanneer nodig
+- Gebruik Tailwind utility classes
+- Buttons moeten aria-labels hebben

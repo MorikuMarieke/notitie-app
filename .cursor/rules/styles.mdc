@@ -1,0 +1,9 @@
+---
+description: Regels voor styling en Tailwind gebruik
+globs: "**/*.css,**/*.tsx"
+---
+# Styling Regels
+- Gebruik de standaard Tailwind kleurenpalet
+- Responsive design: mobile-first (sm:, md:, lg:)
+- Geen component-specifieke CSS bestanden
+- Gebruik globals.css alleen voor CSS vars en base

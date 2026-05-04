@@ -1,3 +1,6 @@
+export type { Checklist, ChecklistItem, ChecklistWithItems } from "./checklist";
+export { NOTE_CHECKLIST, type NoteChecklistClassName } from "./legacy-note-checklist-html";
+
 export interface Category {
   id: string;
   user_id: string;
@@ -10,7 +13,7 @@ export interface Note {
   user_id: string;
   category_id: string | null;
   title: string;
-  /** Rich text (subset HTML) or legacy plain text; sanitized on save. */
+  /** Rich text (subset-HTML); legacy embedded checklists worden nog weergegeven. */
   content: string;
   created_at: string;
   updated_at: string;

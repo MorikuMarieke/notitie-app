@@ -1,4 +1,6 @@
 import sanitizeHtml from "sanitize-html";
+import { htmlHasChecklistItems } from "@/lib/html/note-checklist";
+import { NOTE_CHECKLIST } from "@/types/legacy-note-checklist-html";
 
 export function isSafeColorValue(v: string): boolean {
   const s = v.trim();
@@ -10,6 +12,7 @@ export function isSafeColorValue(v: string): boolean {
 }
 
 const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  /* Legacy embedded checklist tags in older note HTML (subset). */
   allowedTags: [
     "p",
     "br",
@@ -27,12 +30,32 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     "li",
     "span",
     "font",
+    "input",
   ],
   allowedAttributes: {
-    span: ["style"],
+    span: ["style", "class"],
     p: ["style"],
     div: ["style"],
     font: ["color"],
+    ul: ["class", "data-note-checklist"],
+    ol: ["class"],
+    li: ["class", "data-checked"],
+    input: ["type", "class", "checked", "contenteditable"],
+  },
+  exclusiveFilter(frame: { tag: string; attribs: Record<string, string> }) {
+    if (frame.tag !== "input") {
+      return false;
+    }
+    const type = String(frame.attribs.type ?? "").toLowerCase();
+    if (type !== "checkbox") {
+      return true;
+    }
+    const cls = String(frame.attribs.class ?? "");
+    const classes = cls.split(/\s+/).filter(Boolean);
+    if (!classes.includes(NOTE_CHECKLIST.inputClass)) {
+      return true;
+    }
+    return false;
   },
   allowedStyles: {
     "*": {
@@ -50,12 +73,35 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     },
   },
   transformTags: {
+    input: (_tag, attribs) => {
+      const type = String(attribs.type ?? "").toLowerCase();
+      const cls = String(attribs.class ?? "");
+      const classes = cls.split(/\s+/).filter(Boolean);
+      if (type !== "checkbox" || !classes.includes(NOTE_CHECKLIST.inputClass)) {
+        return { tagName: "span", attribs: {} };
+      }
+      const next: Record<string, string> = {
+        type: "checkbox",
+        class: NOTE_CHECKLIST.inputClass,
+        contenteditable: "false",
+      };
+      const c = attribs.checked;
+      const truthy =
+        c === "" ||
+        c === "checked" ||
+        String(c ?? "").toLowerCase() === "true" ||
+        String(c ?? "").toLowerCase() === "on";
+      if (truthy) {
+        next.checked = "checked";
+      }
+      return { tagName: "input", attribs: next };
+    },
     font: (_tag, attribs) => {
       const raw = String(attribs.color ?? "").trim();
       if (isSafeColorValue(raw)) {
         return { tagName: "span", attribs: { style: `color: ${raw}` } };
       }
-      return { tagName: "span", attribs: {} as sanitizeHtml.Attributes };
+      return { tagName: "span", attribs: {} as Record<string, string> };
     },
   },
   allowedSchemes: [],
@@ -135,7 +181,15 @@ export function isEmptyNoteContent(html: string): boolean {
   const sanitized = sanitizeNoteHtml(html);
   const text = stripHtmlToText(sanitized).replace(/\s+/g, " ").trim();
   if (text.length > 0) return false;
+  if (htmlHasChecklistItems(sanitized)) return false;
   return true;
+}
+
+/** True when the note should show a body (plain text or checklist rows, including empty rows). */
+export function noteContentHasDisplayableBody(rawHtml: string): boolean {
+  const safe = sanitizeNoteHtml(rawHtml);
+  if (htmlHasChecklistItems(safe)) return true;
+  return stripHtmlToText(safe).replace(/\s+/g, " ").trim().length > 0;
 }
 
 export function noteContentSearchText(htmlOrPlain: string): string {

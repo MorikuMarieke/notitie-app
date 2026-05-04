@@ -1,4 +1,8 @@
-import { sanitizeNoteHtml, stripHtmlToText } from "@/lib/html/note-content";
+import { noteContentHasDisplayableBody, sanitizeNoteHtml } from "@/lib/html/note-content";
+import {
+  htmlWithDisabledChecklistInputs,
+  NOTE_CHECKLIST_CONTENT_TW,
+} from "@/lib/html/note-checklist";
 import type { NoteWithCategory } from "@/types";
 import Link from "next/link";
 
@@ -9,7 +13,7 @@ interface NoteCardProps {
 export function NoteCard({ note }: NoteCardProps) {
   const title = note.title.trim() || "Zonder titel";
   const safeHtml = sanitizeNoteHtml(note.content);
-  const plain = stripHtmlToText(safeHtml).replace(/\s+/g, " ").trim();
+  const previewHtml = htmlWithDisabledChecklistInputs(safeHtml);
 
   return (
     <Link
@@ -26,11 +30,11 @@ export function NoteCard({ note }: NoteCardProps) {
           </span>
         ) : null}
       </div>
-      {plain ? (
+      {noteContentHasDisplayableBody(note.content) ? (
         <div className="relative mt-2 max-h-[5.25rem] overflow-hidden text-sm text-zinc-700 dark:text-zinc-300">
           <div
-            className="max-w-full break-words [&_b]:font-semibold [&_strong]:font-semibold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_strike]:line-through [&_del]:line-through [&_li]:my-0 [&_li]:list-item [&_ol]:my-0.5 [&_ol]:ml-4 [&_ol]:list-decimal [&_ol]:pl-1 [&_p]:my-0.5 [&_ul]:my-0.5 [&_ul]:ml-4 [&_ul]:list-disc [&_ul]:pl-1 [&_*]:break-words"
-            dangerouslySetInnerHTML={{ __html: safeHtml }}
+            className={`max-w-full break-words [&_b]:font-semibold [&_strong]:font-semibold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_strike]:line-through [&_del]:line-through [&_li]:my-0 [&_li]:list-item [&_ol]:my-0.5 [&_ol]:ml-4 [&_ol]:list-decimal [&_ol]:pl-1 [&_p]:my-0.5 [&_ul]:my-0.5 [&_ul]:ml-4 [&_ul]:list-disc [&_ul]:pl-1 [&_*]:break-words [&_.note-checklist-input]:cursor-default ${NOTE_CHECKLIST_CONTENT_TW}`}
+            dangerouslySetInnerHTML={{ __html: previewHtml }}
           />
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-transparent dark:from-zinc-950"

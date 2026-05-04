@@ -1,7 +1,7 @@
 import { NoteContentDisplay } from "@/components/notes/note-content-display";
 import { NoteDeleteButton } from "@/components/notes/note-delete-button";
 import { NoteForm } from "@/components/notes/note-form";
-import { sanitizeNoteHtml, stripHtmlToText } from "@/lib/html/note-content";
+import { noteContentHasDisplayableBody } from "@/lib/html/note-content";
 import { mapNoteRow, type NoteRowDb } from "@/lib/notes/map-note-row";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -31,10 +31,7 @@ export default async function EditNotePage({ params, searchParams }: NotePagePro
   }
 
   const note = mapNoteRow(row as NoteRowDb);
-  const hasReadableContent =
-    stripHtmlToText(sanitizeNoteHtml(note.content))
-      .replace(/\s+/g, " ")
-      .trim().length > 0;
+  const hasReadableContent = noteContentHasDisplayableBody(note.content);
 
   const { data: categories } = await supabase
     .from("categories")

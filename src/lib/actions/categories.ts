@@ -36,7 +36,7 @@ export async function createCategory(
 }
 
 export async function updateCategory(formData: FormData): Promise<void> {
-  const id = String(formData.get("id") ?? "");
+  const id = String(formData.get("id") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   if (!id || !name) {
     return;
@@ -55,7 +55,7 @@ export async function updateCategory(formData: FormData): Promise<void> {
 }
 
 export async function deleteCategory(formData: FormData): Promise<void> {
-  const id = String(formData.get("id") ?? "");
+  const id = String(formData.get("id") ?? "").trim();
   if (!id) {
     return;
   }

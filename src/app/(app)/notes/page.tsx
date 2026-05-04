@@ -1,5 +1,6 @@
 import { NoteList } from "@/components/notes/note-list";
 import { NotesToolbar } from "@/components/notes/notes-toolbar";
+import { noteContentSearchText } from "@/lib/html/note-content";
 import { mapNoteRow, type NoteRowDb } from "@/lib/notes/map-note-row";
 import { createClient } from "@/lib/supabase/server";
 import type { NoteWithCategory } from "@/types";
@@ -41,7 +42,7 @@ export default async function NotesPage({
     notes = notes.filter(
       (n) =>
         n.title.toLowerCase().includes(needle) ||
-        n.content.toLowerCase().includes(needle),
+        noteContentSearchText(n.content).includes(needle),
     );
   }
 

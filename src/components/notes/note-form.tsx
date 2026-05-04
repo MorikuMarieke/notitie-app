@@ -1,7 +1,9 @@
 "use client";
 
 import { CategorySelect } from "@/components/notes/category-select";
+import { RichTextEditor } from "@/components/notes/rich-text-editor";
 import { createNote, updateNote, type NoteActionResult } from "@/lib/actions/notes";
+import { prepareEditorInitialHtml } from "@/lib/html/note-content";
 import type { Category, NoteWithCategory } from "@/types";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
@@ -31,6 +33,7 @@ export function NoteForm({ categories, note }: NoteFormProps) {
   const isEdit = Boolean(note);
   const action = isEdit ? updateNote : createNote;
   const [state, formAction] = useActionState(action, initial);
+  const editorHtml = prepareEditorInitialHtml(note?.content ?? "");
 
   return (
     <form action={formAction} className="space-y-6">
@@ -60,13 +63,7 @@ export function NoteForm({ categories, note }: NoteFormProps) {
         <label htmlFor="content" className="block text-sm font-medium">
           Inhoud
         </label>
-        <textarea
-          id="content"
-          name="content"
-          rows={12}
-          defaultValue={note?.content ?? ""}
-          className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-950"
-        />
+        <RichTextEditor key={note?.id ?? "new"} defaultHtml={editorHtml} name="content" />
       </div>
       <div className="flex flex-wrap gap-3">
         <SubmitButton label={isEdit ? "Wijzigingen opslaan" : "Notitie opslaan"} />

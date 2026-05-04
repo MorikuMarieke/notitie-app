@@ -1,3 +1,4 @@
+import { stripHtmlToText } from "@/lib/html/note-content";
 import type { NoteWithCategory } from "@/types";
 import Link from "next/link";
 
@@ -7,7 +8,8 @@ interface NoteCardProps {
 
 export function NoteCard({ note }: NoteCardProps) {
   const title = note.title.trim() || "Zonder titel";
-  const preview = note.content.trim().slice(0, 160);
+  const plain = stripHtmlToText(note.content).replace(/\s+/g, " ").trim();
+  const preview = plain.slice(0, 160);
 
   return (
     <Link
@@ -27,7 +29,7 @@ export function NoteCard({ note }: NoteCardProps) {
       {preview ? (
         <p className="mt-2 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
           {preview}
-          {note.content.length > 160 ? "…" : ""}
+          {plain.length > 160 ? "…" : ""}
         </p>
       ) : (
         <p className="mt-2 text-sm italic text-zinc-500">Lege notitie</p>

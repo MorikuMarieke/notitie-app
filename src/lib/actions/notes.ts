@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { isEmptyNoteContent, sanitizeNoteHtml } from "@/lib/html/note-content";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -16,7 +17,8 @@ export async function createNote(
   formData: FormData,
 ): Promise<NoteActionResult> {
   const title = String(formData.get("title") ?? "");
-  const content = String(formData.get("content") ?? "");
+  const rawContent = String(formData.get("content") ?? "");
+  const content = sanitizeNoteHtml(rawContent);
   const category_id = readCategoryId(formData);
 
   const supabase = await createClient();
@@ -25,6 +27,12 @@ export async function createNote(
   } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Niet ingelogd." };
+  }
+
+  if (isEmptyNoteContent(content)) {
+    return {
+      error: "Inhoud mag niet leeg zijn (alleen spaties of lege opmaak telt ook als leeg).",
+    };
   }
 
   const { error } = await supabase.from("notes").insert({
@@ -48,11 +56,18 @@ export async function updateNote(
 ): Promise<NoteActionResult> {
   const id = String(formData.get("id") ?? "").trim();
   const title = String(formData.get("title") ?? "");
-  const content = String(formData.get("content") ?? "");
+  const rawContent = String(formData.get("content") ?? "");
+  const content = sanitizeNoteHtml(rawContent);
   const category_id = readCategoryId(formData);
 
   if (!id) {
     return { error: "Ontbrekende notitie." };
+  }
+
+  if (isEmptyNoteContent(content)) {
+    return {
+      error: "Inhoud mag niet leeg zijn (alleen spaties of lege opmaak telt ook als leeg).",
+    };
   }
 
   const supabase = await createClient();

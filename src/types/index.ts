@@ -10,6 +10,7 @@ export interface Note {
   user_id: string;
   category_id: string | null;
   title: string;
+  /** Rich text (subset HTML) or legacy plain text; sanitized on save. */
   content: string;
   created_at: string;
   updated_at: string;

@@ -55,7 +55,7 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
       if (isSafeColorValue(raw)) {
         return { tagName: "span", attribs: { style: `color: ${raw}` } };
       }
-      return { tagName: "span", attribs: {} };
+      return { tagName: "span", attribs: {} as sanitizeHtml.Attributes };
     },
   },
   allowedSchemes: [],
@@ -70,11 +70,11 @@ export function sanitizeNoteHtml(raw: string): string {
   }
 }
 
-/** Heuristic: stored rich HTML vs legacy plain text. */
+/** Heuristic: stored rich HTML vs legacy plain text (avoids false positives e.g. "<pilot"). */
 export function looksLikeStoredHtml(content: string): boolean {
   const t = content.trim();
   if (!t) return false;
-  return /^<[a-z]/i.test(t);
+  return /^<\s*(p|div|br|span|strong|b|em|i|u|s|strike|del|ul|ol|li|font)\b/i.test(t);
 }
 
 function escapeHtmlText(text: string): string {
